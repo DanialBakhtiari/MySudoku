@@ -16,15 +16,263 @@
     />
     <meta name="dcterms.creator" content="Danial Bakhtiari" />
     <link rel="stylesheet" href="./src/style.css" />
-    <link rel="icon" type="image/png" href="./favicon/favicon-96x96.png" sizes="96x96" />
+    <link
+      rel="icon"
+      type="image/png"
+      href="./favicon/favicon-96x96.png"
+      sizes="96x96"
+    />
     <link rel="icon" type="image/svg+xml" href="./favicon/favicon.svg" />
     <link rel="shortcut icon" href="./favicon/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="./favicon/apple-touch-icon.png" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="./favicon/apple-touch-icon.png"
+    />
     <meta name="apple-mobile-web-app-title" content="My Sudoku" />
     <link rel="manifest" href="./favicon/site.webmanifest" />
-    <title>My Sudoku</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <title>Sudoku Pro</title>
   </head>
-  <body>
+  <body
+    class="min-h-screen bg-base-300 dark:bg-gray-900 font-['Outfit'] text-base-content dark:text-gray-100 antialiased flex flex-col items-center justify-center p-4 transition-colors duration-300"
+  >
+    <div id="app" class="w-full max-w-lg flex flex-col gap-6">
+      <!-- Header -->
+      <header
+        class="navbar bg-base-100 dark:bg-gray-800 shadow-xl rounded-box transition-colors duration-300"
+      >
+        <div class="flex-1">
+          <a class="btn btn-ghost text-2xl font-bold tracking-tight">
+            <span class="text-primary dark:text-accent">Sudoku</span>Pro
+          </a>
+        </div>
+        <div class="flex-none">
+          <label class="btn btn-square btn-ghost swap swap-rotate">
+            <!-- this hidden checkbox controls the state -->
+            <input type="checkbox" id="theme-controller" />
+
+            <!-- sun icon (shows when checked -> light) -->
+            <svg class="swap-on fill-current w-6 h-6 " version="1.0" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 64 64" enable-background="new 0 0 64 64" xml:space="preserve" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g> <path fill-rule="evenodd" clip-rule="evenodd" fill="#394240" d="M32,14.002c-9.941,0-18,8.059-18,18s8.059,18,18,18 s18-8.059,18-18S41.941,14.002,32,14.002z M32,48.002c-8.837,0-16-7.164-16-16s7.163-16,16-16s16,7.164,16,16 S40.837,48.002,32,48.002z"></path> <path fill-rule="evenodd" clip-rule="evenodd" fill="#394240" d="M63,31H53c-0.553,0-1,0.447-1,1s0.447,1,1,1h10 c0.553,0,1-0.447,1-1S63.553,31,63,31z"></path> <path fill-rule="evenodd" clip-rule="evenodd" fill="#394240" d="M11.457,36.469l-3.863,1.035 c-0.534,0.145-0.851,0.693-0.707,1.227c0.143,0.533,0.69,0.85,1.225,0.705l3.863-1.035c0.533-0.143,0.85-0.689,0.707-1.225 C12.539,36.643,11.99,36.326,11.457,36.469z"></path> <path fill-rule="evenodd" clip-rule="evenodd" fill="#394240" d="M49.32,22c0.277,0.479,0.888,0.643,1.367,0.365l8.66-5 c0.479-0.275,0.643-0.887,0.365-1.365c-0.275-0.479-0.887-0.643-1.365-0.365l-8.66,5C49.208,20.912,49.045,21.521,49.32,22z"></path> <path fill-rule="evenodd" clip-rule="evenodd" fill="#394240" d="M17.858,46.143c-0.39-0.391-1.023-0.389-1.414,0l-2.828,2.828 c-0.391,0.391-0.39,1.025,0.001,1.414c0.39,0.391,1.022,0.391,1.413,0l2.828-2.828C18.249,47.168,18.249,46.533,17.858,46.143z"></path> <path fill-rule="evenodd" clip-rule="evenodd" fill="#394240" d="M42,14.68c0.479,0.275,1.09,0.113,1.367-0.367l5-8.66 C48.644,5.174,48.48,4.562,48,4.287c-0.478-0.277-1.088-0.113-1.365,0.365l-4.999,8.662C41.358,13.793,41.522,14.402,42,14.68z"></path> <path fill-rule="evenodd" clip-rule="evenodd" fill="#394240" d="M26.824,51.318c-0.532-0.143-1.08,0.176-1.225,0.707l-1.035,3.863 c-0.143,0.535,0.176,1.082,0.709,1.225c0.533,0.145,1.08-0.172,1.223-0.707l1.035-3.863C27.676,52.012,27.359,51.463,26.824,51.318 z"></path> <path fill-rule="evenodd" clip-rule="evenodd" fill="#394240" d="M32,12c0.554,0,1.001-0.447,1.002-1V1c0-0.553-0.447-1-1.002-1 c-0.551,0-0.998,0.447-0.999,1l0.001,10C31.002,11.553,31.449,12,32,12z"></path> <path fill-rule="evenodd" clip-rule="evenodd" fill="#394240" d="M38.402,52.025c-0.141-0.533-0.689-0.85-1.225-0.707 c-0.533,0.143-0.848,0.691-0.707,1.225l1.035,3.863c0.144,0.535,0.693,0.85,1.227,0.707s0.849-0.689,0.705-1.225L38.402,52.025z"></path> <path fill-rule="evenodd" clip-rule="evenodd" fill="#394240" d="M20.637,14.312c0.275,0.479,0.887,0.643,1.363,0.367 c0.48-0.277,0.645-0.887,0.368-1.367l-5-8.66C17.092,4.174,16.48,4.01,16,4.287c-0.477,0.275-0.641,0.887-0.365,1.365 L20.637,14.312z"></path> <path fill-rule="evenodd" clip-rule="evenodd" fill="#394240" d="M47.558,46.141c-0.388-0.389-1.022-0.389-1.414,0 c-0.391,0.391-0.388,1.025,0,1.414l2.828,2.828c0.392,0.393,1.025,0.389,1.415,0c0.391-0.391,0.391-1.021-0.001-1.414 L47.558,46.141z"></path> <path fill-rule="evenodd" clip-rule="evenodd" fill="#394240" d="M4.654,17.365l8.662,4.998c0.477,0.277,1.088,0.113,1.363-0.363 c0.277-0.48,0.115-1.09-0.364-1.367l-8.661-5C5.176,15.355,4.564,15.52,4.287,16C4.013,16.477,4.176,17.088,4.654,17.365z"></path> <path fill-rule="evenodd" clip-rule="evenodd" fill="#394240" d="M52.027,38.4l3.863,1.035c0.535,0.145,1.082-0.176,1.225-0.709 c0.144-0.533-0.172-1.08-0.707-1.223l-3.863-1.035c-0.531-0.145-1.081,0.172-1.225,0.707C51.176,37.709,51.496,38.256,52.027,38.4z "></path> <path fill-rule="evenodd" clip-rule="evenodd" fill="#394240" d="M12,32c0.001-0.555-0.445-1-0.998-1.002L1,31 c-0.552,0-1,0.445-1,1c0.001,0.551,0.448,1,1.001,1l10.001-0.002C11.553,32.998,12.001,32.551,12,32z"></path> <path fill-rule="evenodd" clip-rule="evenodd" fill="#394240" d="M52.545,27.529l3.863-1.035c0.535-0.143,0.85-0.693,0.706-1.227 c-0.142-0.531-0.688-0.848-1.224-0.705l-3.863,1.035c-0.533,0.141-0.85,0.691-0.707,1.225 C51.461,27.355,52.012,27.67,52.545,27.529z"></path> <circle fill-rule="evenodd" clip-rule="evenodd" fill="#F9EBB2" cx="32" cy="32" r="16"></circle> <path fill-rule="evenodd" clip-rule="evenodd" fill="#394240" d="M14.68,42c-0.275-0.48-0.886-0.645-1.365-0.369l-8.661,5.002 C4.176,46.91,4.01,47.52,4.287,48c0.277,0.477,0.889,0.641,1.367,0.365l8.66-5.002C14.791,43.088,14.957,42.479,14.68,42z"></path> <path fill-rule="evenodd" clip-rule="evenodd" fill="#394240" d="M46.144,17.855c0.389,0.393,1.022,0.389,1.414,0l2.828-2.828 c0.392-0.391,0.39-1.023-0.002-1.414c-0.388-0.391-1.021-0.391-1.412,0l-2.828,2.828C45.752,16.83,45.754,17.465,46.144,17.855z"></path> <path fill-rule="evenodd" clip-rule="evenodd" fill="#394240" d="M22,49.32c-0.479-0.277-1.088-0.113-1.365,0.363l-5,8.664 c-0.275,0.477-0.115,1.088,0.365,1.365c0.479,0.273,1.09,0.109,1.367-0.367l4.998-8.662C22.641,50.207,22.48,49.596,22,49.32z"></path> <path fill-rule="evenodd" clip-rule="evenodd" fill="#394240" d="M37.178,12.68c0.531,0.145,1.078-0.176,1.225-0.707l1.035-3.863 c0.143-0.535-0.176-1.084-0.709-1.225c-0.531-0.145-1.08,0.172-1.223,0.707l-1.035,3.863C36.324,11.986,36.645,12.535,37.178,12.68 z"></path> <path fill-rule="evenodd" clip-rule="evenodd" fill="#394240" d="M32,52c-0.553-0.002-0.998,0.445-1,0.998l0.002,10.004 C31.002,63.551,31.445,64,32,64c0.553,0,1-0.449,1.001-1l-0.003-10.002C32.998,52.447,32.555,52,32,52z"></path> <path fill-rule="evenodd" clip-rule="evenodd" fill="#394240" d="M25.6,11.973c0.139,0.533,0.691,0.85,1.225,0.707 c0.532-0.141,0.846-0.691,0.707-1.225l-1.035-3.863c-0.145-0.535-0.693-0.852-1.227-0.707c-0.531,0.143-0.85,0.689-0.705,1.225 L25.6,11.973z"></path> <path fill-rule="evenodd" clip-rule="evenodd" fill="#394240" d="M43.363,49.686C43.088,49.209,42.48,49.043,42,49.32 c-0.479,0.275-0.641,0.885-0.367,1.365l5.004,8.66c0.275,0.479,0.883,0.645,1.363,0.367c0.479-0.277,0.642-0.889,0.367-1.367 L43.363,49.686z"></path> <path fill-rule="evenodd" clip-rule="evenodd" fill="#394240" d="M16.443,17.855c0.387,0.395,1.023,0.391,1.414,0 c0.391-0.387,0.387-1.02,0-1.414l-2.828-2.828c-0.393-0.391-1.025-0.389-1.415,0.002c-0.39,0.389-0.392,1.021,0.001,1.412 L16.443,17.855z"></path> <path fill-rule="evenodd" clip-rule="evenodd" fill="#394240" d="M59.348,46.633l-8.663-4.998 c-0.478-0.275-1.087-0.115-1.363,0.367c-0.278,0.477-0.112,1.086,0.364,1.363l8.664,5c0.477,0.275,1.086,0.115,1.363-0.365 C59.988,47.52,59.824,46.91,59.348,46.633z"></path> <path fill-rule="evenodd" clip-rule="evenodd" fill="#394240" d="M11.974,25.598L8.11,24.562c-0.536-0.143-1.083,0.176-1.225,0.709 c-0.144,0.531,0.171,1.08,0.707,1.225l3.863,1.033c0.531,0.146,1.081-0.174,1.225-0.707C12.825,26.293,12.505,25.746,11.974,25.598 z"></path> <path fill-rule="evenodd" clip-rule="evenodd" fill="#394240" d="M32,20.002c-0.553,0-1,0.447-1,1s0.447,1,1,1 c5.522,0,10,4.477,10,10c0,0.553,0.447,1,1,1s1-0.447,1-1C44,25.375,38.627,20.002,32,20.002z"></path> </g> </g></svg>
+
+            <!-- moon icon (shows when unchecked -> dark) -->
+              <svg class="swap-off fill-current w-6 h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path fill-rule="evenodd" clip-rule="evenodd" d="M11.0174 2.80157C6.37072 3.29221 2.75 7.22328 2.75 12C2.75 13.1448 2.95764 14.2397 3.33685 15.25H12.8489C10.1562 14.1916 8.25 11.5684 8.25 8.5C8.25 6.18738 9.33315 4.1283 11.0174 2.80157ZM18.1508 15.25H20.6631C20.9324 14.5327 21.1151 13.7727 21.1985 12.9825C20.4085 13.9854 19.359 14.7751 18.1508 15.25ZM22.2375 15.2884C22.5704 14.2513 22.75 13.1461 22.75 12C22.75 11.2834 22.1787 10.9246 21.7237 10.8632C21.286 10.804 20.7293 10.9658 20.4253 11.469C19.4172 13.1373 17.5882 14.25 15.5 14.25C12.3244 14.25 9.75 11.6756 9.75 8.5C9.75 6.41182 10.8627 4.5828 12.531 3.57467C13.0342 3.27065 13.196 2.71398 13.1368 2.27627C13.0754 1.82126 12.7166 1.25 12 1.25C6.06294 1.25 1.25 6.06294 1.25 12C1.25 13.1461 1.4296 14.2513 1.76248 15.2884C1.46468 15.3877 1.25 15.6688 1.25 16C1.25 16.4142 1.58579 16.75 2 16.75H22C22.4142 16.75 22.75 16.4142 22.75 16C22.75 15.6688 22.5353 15.3877 22.2375 15.2884ZM4.25 19C4.25 18.5858 4.58579 18.25 5 18.25H19C19.4142 18.25 19.75 18.5858 19.75 19C19.75 19.4142 19.4142 19.75 19 19.75H5C4.58579 19.75 4.25 19.4142 4.25 19ZM7.25 22C7.25 21.5858 7.58579 21.25 8 21.25H16C16.4142 21.25 16.75 21.5858 16.75 22C16.75 22.4142 16.4142 22.75 16 22.75H8C7.58579 22.75 7.25 22.4142 7.25 22Z" fill="#ffffff"></path> <path fill-rule="evenodd" clip-rule="evenodd" d="M20.3655 2.12433C20.0384 1.29189 18.8624 1.29189 18.5353 2.12433L18.1073 3.21354L17.0227 3.6429C16.1933 3.97121 16.1933 5.14713 17.0227 5.47544L18.1073 5.90481L18.5353 6.99401C18.8624 7.82645 20.0384 7.82646 20.3655 6.99402L20.7935 5.90481L21.8781 5.47544C22.7075 5.14714 22.7075 3.97121 21.8781 3.6429L20.7935 3.21354L20.3655 2.12433ZM19.4504 2.52989L19.8651 3.58533C19.9648 3.83891 20.165 4.04027 20.4188 4.14073L21.4759 4.55917L20.4188 4.97762C20.165 5.07808 19.9648 5.27943 19.8651 5.53301L19.4504 6.58846L19.0357 5.53301C18.936 5.27943 18.7358 5.07808 18.482 4.97762L17.4249 4.55917L18.482 4.14073C18.7358 4.04027 18.936 3.83891 19.0357 3.58533L19.4504 2.52989ZM16.4981 7.94681C16.171 7.11437 14.9951 7.11437 14.668 7.94681L14.5134 8.34008L14.1222 8.49497C13.2928 8.82328 13.2928 9.9992 14.1222 10.3275L14.5134 10.4824L14.668 10.8757C14.9951 11.7081 16.171 11.7081 16.4981 10.8757L16.6527 10.4824L17.0439 10.3275C17.8733 9.9992 17.8733 8.82328 17.0439 8.49497L16.6527 8.34008L16.4981 7.94681ZM15.583 8.35237L15.7243 8.71188C15.824 8.96545 16.0242 9.16681 16.278 9.26727L16.6417 9.41124L16.278 9.55521C16.0242 9.65567 15.824 9.85703 15.7243 10.1106L15.583 10.4701L15.4418 10.1106C15.3421 9.85703 15.1419 9.65567 14.8881 9.55521L14.5244 9.41124L14.8881 9.26727C15.1419 9.16681 15.3421 8.96545 15.4418 8.71188L15.583 8.35237Z" fill="#ffffff"></path> </g></svg>
+          </label>
+        </div>
+      </header>
+
+      <!-- Stats Bar -->
+      <div class="stats shadow w-full bg-base-100">
+        <div class="stat place-items-center p-2">
+          <div class="stat-title text-xs uppercase font-bold tracking-wider">
+            Difficulty
+          </div>
+          <div id="difficulty-display" class="stat-value text-lg text-primary">
+            Medium
+          </div>
+        </div>
+        <div class="stat place-items-center p-2">
+          <div class="stat-title text-xs uppercase font-bold tracking-wider">
+            Mistakes
+          </div>
+          <div class="stat-value text-lg text-error">
+            <span id="mistakes-count">0</span>/3
+          </div>
+        </div>
+        <div class="stat place-items-center p-2">
+          <div class="stat-title text-xs uppercase font-bold tracking-wider">
+            Time
+          </div>
+          <div id="timer" class="stat-value text-lg font-mono">00:00</div>
+        </div>
+      </div>
+
+      <!-- Game Board -->
+      <div class="card bg-base-100 shadow-2xl">
+        <div class="card-body p-1 sm:p-4">
+          <div
+            id="sudoku-grid"
+            class="grid grid-cols-9 gap-0.5 bg-base-content/20 border-2 border-base-content/50 aspect-square"
+          >
+            <!-- Cells will be generated here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="flex flex-col gap-4">
+        <!-- Numpad -->
+        <div class="grid grid-cols-9 gap-1 sm:gap-2">
+          <!-- Dynamic Numpad buttons 1-9 -->
+          <button
+            class="numpad-btn btn btn-neutral btn-lg text-xl"
+            data-value="1"
+          >
+            1
+          </button>
+          <button
+            class="numpad-btn btn btn-neutral btn-lg text-xl"
+            data-value="2"
+          >
+            2
+          </button>
+          <button
+            class="numpad-btn btn btn-neutral btn-lg text-xl"
+            data-value="3"
+          >
+            3
+          </button>
+          <button
+            class="numpad-btn btn btn-neutral btn-lg text-xl"
+            data-value="4"
+          >
+            4
+          </button>
+          <button
+            class="numpad-btn btn btn-neutral btn-lg text-xl"
+            data-value="5"
+          >
+            5
+          </button>
+          <button
+            class="numpad-btn btn btn-neutral btn-lg text-xl"
+            data-value="6"
+          >
+            6
+          </button>
+          <button
+            class="numpad-btn btn btn-neutral btn-lg text-xl"
+            data-value="7"
+          >
+            7
+          </button>
+          <button
+            class="numpad-btn btn btn-neutral btn-lg text-xl"
+            data-value="8"
+          >
+            8
+          </button>
+          <button
+            class="numpad-btn btn btn-neutral btn-lg text-xl"
+            data-value="9"
+          >
+            9
+          </button>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-2 justify-center">
+          <button id="btn-undo" class="btn btn-outline btn-sm flex-1">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="w-4 h-4 mr-1"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"
+              />
+            </svg>
+            Undo
+          </button>
+          <button id="btn-erase" class="btn btn-outline btn-sm flex-1">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="w-4 h-4 mr-1"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+              />
+            </svg>
+            Erase
+          </button>
+          <button id="btn-notes" class="btn btn-outline btn-sm flex-1">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="w-4 h-4 mr-1"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"
+              />
+            </svg>
+            Notes
+          </button>
+        </div>
+
+        <div class="divider my-0"></div>
+
+        <div class="flex gap-2">
+          <select
+            id="difficulty-select"
+            class="select select-bordered w-full max-w-xs"
+          >
+            <option value="easy">Easy</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+          <button id="btn-new-game" class="btn btn-primary flex-1">
+            New Game
+          </button>
+        </div>
+      </div>
+    </div>
+    <footer class="footer footer-center mt-1.5">
+      <div class="footer-content">
+        <div>
+          <p>Copyright © 2026 - All rights reserved by Danial Bakhtiari</p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Win Modal -->
+    <dialog id="win_modal" class="modal">
+      <div class="modal-box text-center">
+        <h3 class="font-bold text-3xl text-success mb-4">You Won! 🎉</h3>
+        <p class="py-4 text-lg">Great job solving the puzzle!</p>
+        <div class="stats shadow my-4">
+          <div class="stat">
+            <div class="stat-title">Time</div>
+            <div id="modal-time" class="stat-value">05:23</div>
+          </div>
+          <div class="stat">
+            <div class="stat-title">Difficulty</div>
+            <div id="modal-difficulty" class="stat-value text-sm">Medium</div>
+          </div>
+        </div>
+        <div class="modal-action justify-center">
+          <form method="dialog">
+            <button
+              class="btn btn-primary"
+              onclick="document.getElementById('btn-new-game').click()"
+            >
+              Play Again
+            </button>
+          </form>
+        </div>
+      </div>
+    </dialog>
+
     <script type="module" src="./src/main.js"></script>
   </body>
 </html>

@@ -1,2 +1,51 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 @plugin "daisyui";
+
+body {
+  font-family: "Outfit", sans-serif;
+}
+
+/* Custom grid borders */
+.sudoku-cell {
+  @apply flex items-center justify-center text-2xl font-medium cursor-pointer transition-colors duration-200 select-none;
+}
+
+.sudoku-cell:hover {
+  @apply bg-base-content/10;
+}
+
+.sudoku-cell.selected {
+  @apply bg-primary text-primary-content;
+}
+
+.sudoku-cell.highlighted {
+  @apply bg-base-content/10;
+}
+
+.sudoku-cell.error {
+  @apply bg-error/20 text-error;
+}
+
+.sudoku-cell.filled-start {
+  @apply font-bold;
+}
+
+/* Thicker borders for 3x3 blocks */
+.grid-cols-9 > div:nth-child(3n) {
+  border-right-width: 2px;
+  border-right-color: var(--color-base-content);
+  opacity: 1;
+}
+
+/* Remove right border from last column */
+.grid-cols-9 > div:nth-child(9n) {
+  border-right-width: 0;
+}
+
+/* Bottom borders for 3x3 blocks */
+.grid-cols-9 > div:nth-child(n + 19):nth-child(-n + 27),
+.grid-cols-9 > div:nth-child(n + 46):nth-child(-n + 54) {
+  border-bottom-width: 2px;
+  border-bottom-color: var(--color-base-content);
+}
