@@ -1,0 +1,136 @@
+# =============================================================================
+# Sudoku Pro — Build & Deploy to Shared Hosting
+# =============================================================================
+# Triggers on every push to `main`, builds the Vite app, then uploads `dist/`
+# to your shared host over FTPS (FTP over TLS).
+#
+# ---------------------------------------------------------------------------
+# REQUIRED GitHub Secrets
+# ---------------------------------------------------------------------------
+# Add these under: Repository → Settings → Secrets and variables → Actions
+#
+#   FTP_SERVER
+#     Hostname of your shared hosting FTP server.
+#     Examples: ftp.yourdomain.com  |  203.0.113.10
+#
+#   FTP_USERNAME
+#     FTP account username provided by your host.
+#
+#   FTP_PASSWORD
+#     FTP account password (or app-specific password if your host supports it).
+#
+#   FTP_SERVER_DIR
+#     Remote folder where the site should live (MUST end with a trailing slash).
+#     Examples:
+#       /public_html/
+#       /public_html/sudoku/
+#       /httpdocs/mysudoku/
+#
+# OPTIONAL GitHub Secrets
+# ---------------------------------------------------------------------------
+#   FTP_PORT
+#     FTP port if not the default 21. Example: 21 or 990 (for implicit FTPS).
+#     If unset, the action uses port 21.
+#
+# ---------------------------------------------------------------------------
+# ALTERNATIVE: SSH / rsync deploy (instead of FTP)
+# ---------------------------------------------------------------------------
+# If your host gives you SSH access, comment out the FTP step below and enable
+# the rsync block. You would then need these secrets instead:
+#
+#   SSH_HOST          — server hostname
+#   SSH_USERNAME      — SSH user
+#   SSH_PRIVATE_KEY   — full private key PEM contents
+#   SSH_PORT          — usually 22
+#   SSH_REMOTE_PATH   — e.g. /home/user/public_html/sudoku
+#
+# =============================================================================
+
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+  # Allow manual runs from the Actions tab (useful for re-deploying without a commit)
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-main
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Security audit (fail on high/critical)
+        run: npm audit --audit-level=high
+
+      - name: Build production bundle
+        run: npm run build
+
+      - name: Verify dist output exists
+        run: |
+          test -f dist/index.html
+          test -f dist/sw.js
+          test -f dist/manifest.webmanifest
+          echo "Build artifacts OK:"
+          find dist -type f | head -n 40
+
+      # -----------------------------------------------------------------------
+      # FTP / FTPS deploy (default for shared hosting)
+      # -----------------------------------------------------------------------
+      - name: Deploy dist/ via FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          # --- REQUIRED secrets (see header comments) ---
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          # Remote destination folder (include trailing slash)
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+
+          # Upload only the production build
+          local-dir: ./dist/
+
+          # Encrypted FTP (typical on modern shared hosts)
+          protocol: ftps
+          dangerous-clean-slate: false
+          timeout: 60000
+
+          # Optional: set FTP_PORT secret and uncomment if your host uses a non-default port
+          # port: ${{ secrets.FTP_PORT }}
+
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/.DS_Store
+
+      # -----------------------------------------------------------------------
+      # OPTIONAL: SSH / rsync deploy (uncomment to use instead of FTP)
+      # -----------------------------------------------------------------------
+      # - name: Deploy dist/ via rsync over SSH
+      #   uses: burnett01/rsync-deployments@7.0.2
+      #   with:
+      #     switches: -avzr --delete
+      #     path: dist/
+      #     remote_path: ${{ secrets.SSH_REMOTE_PATH }}
+      #     remote_host: ${{ secrets.SSH_HOST }}
+      #     remote_port: ${{ secrets.SSH_PORT }}
+      #     remote_user: ${{ secrets.SSH_USERNAME }}
+      #     remote_key: ${{ secrets.SSH_PRIVATE_KEY }}
