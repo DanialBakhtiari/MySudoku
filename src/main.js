@@ -1,4 +1,7 @@
+import { registerSW } from "virtual:pwa-register";
 import { SudokuCore, BLANK } from "./sudoku.js";
+
+registerSW({ immediate: true });
 
 const sudoku = new SudokuCore();
 
@@ -119,7 +122,7 @@ function setupEventListeners() {
       if (key === "ArrowUp") row = Math.max(0, row - 1);
       if (key === "ArrowDown") row = Math.min(8, row + 1);
       if (key === "ArrowLeft") col = Math.max(0, col - 1);
-      if (key === "ArrowRight") col = Math.min(8, row + 1);
+      if (key === "ArrowRight") col = Math.min(8, col + 1);
       selectCell(row, col);
       return;
     }
