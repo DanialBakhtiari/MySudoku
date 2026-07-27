@@ -4,59 +4,95 @@ import { SudokuCore, BLANK } from "./sudoku.js";
 registerSW({ immediate: true });
 
 const sudoku = new SudokuCore();
+const STATS_KEY = "mysudoku-stats";
 
 // State
 let solution = [];
-let puzzle = []; // The initial state of the puzzle
-let userGrid = []; // The current state including user inputs
-let selectedCell = null; // { row, col }
+let puzzle = [];
+let userGrid = [];
+let selectedCell = null;
 let mistakes = 0;
+let moves = 0;
 let timerInterval = null;
 let seconds = 0;
 let isNotesMode = false;
-let notesGrid = []; // 9x9 array of Sets
+let notesGrid = [];
 let isGameOver = false;
+let history = [];
 
 // DOM Elements
 const gridElement = document.getElementById("sudoku-grid");
 const mistakesElement = document.getElementById("mistakes-count");
+const movesElement = document.getElementById("moves-count");
 const timerElement = document.getElementById("timer");
+const streakElement = document.getElementById("streak-count");
+const bestTimeElement = document.getElementById("best-time");
 const difficultySelect = document.getElementById("difficulty-select");
 const newGameBtn = document.getElementById("btn-new-game");
-const undoBtn = document.getElementById("btn-undo"); // Placeholder functionality
+const undoBtn = document.getElementById("btn-undo");
 const eraseBtn = document.getElementById("btn-erase");
 const notesBtn = document.getElementById("btn-notes");
 const winModal = document.getElementById("win_modal");
 const modalTime = document.getElementById("modal-time");
+const modalMoves = document.getElementById("modal-moves");
 const modalDifficulty = document.getElementById("modal-difficulty");
+const modalStreak = document.getElementById("modal-streak");
+const modalMessage = document.getElementById("modal-message");
+const modalRecord = document.getElementById("modal-record");
 const themeController = document.getElementById("theme-controller");
 
-// History for Undo
-let history = [];
-
-// Initialize
 init();
 
 function init() {
   setupTheme();
   setupEventListeners();
+  refreshRecordsUI();
   startNewGame();
 }
 
+function defaultStats() {
+  return {
+    streak: 0,
+    bestStreak: 0,
+    gamesWon: 0,
+    bestTimes: { easy: null, medium: null, hard: null },
+  };
+}
+
+function loadStats() {
+  try {
+    const raw = localStorage.getItem(STATS_KEY);
+    if (!raw) return defaultStats();
+    return { ...defaultStats(), ...JSON.parse(raw) };
+  } catch {
+    return defaultStats();
+  }
+}
+
+function saveStats(stats) {
+  localStorage.setItem(STATS_KEY, JSON.stringify(stats));
+}
+
+function formatTime(totalSeconds) {
+  const m = Math.floor(totalSeconds / 60)
+    .toString()
+    .padStart(2, "0");
+  const s = (totalSeconds % 60).toString().padStart(2, "0");
+  return `${m}:${s}`;
+}
+
+function refreshRecordsUI() {
+  const stats = loadStats();
+  const difficulty = difficultySelect.value;
+  streakElement.innerText = String(stats.streak);
+  const best = stats.bestTimes[difficulty];
+  bestTimeElement.innerText = best == null ? "--:--" : formatTime(best);
+}
+
 function setupTheme() {
-  // Check local storage or system preference
   const localTheme = localStorage.getItem("theme");
   const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-
-  let isDark;
-
-  if (localTheme) {
-    isDark = localTheme === "dark";
-  } else {
-    isDark = systemDark;
-  }
-
-  // Apply initial state
+  const isDark = localTheme ? localTheme === "dark" : systemDark;
   setTheme(isDark);
 }
 
@@ -64,14 +100,14 @@ function setTheme(isDark) {
   const html = document.documentElement;
   if (isDark) {
     html.classList.add("dark");
-    html.setAttribute("data-theme", "dracula"); // Optional: DaisyUI theme
+    html.setAttribute("data-theme", "dracula");
     localStorage.setItem("theme", "dark");
-    themeController.checked = false; // Unchecked for Moon (Dark)
+    themeController.checked = false;
   } else {
     html.classList.remove("dark");
-    html.setAttribute("data-theme", "cupcake"); // Optional: DaisyUI theme
+    html.setAttribute("data-theme", "cupcake");
     localStorage.setItem("theme", "light");
-    themeController.checked = true; // Checked for Sun (Light)
+    themeController.checked = true;
   }
 }
 
@@ -79,13 +115,15 @@ function setupEventListeners() {
   newGameBtn.addEventListener("click", startNewGame);
 
   difficultySelect.addEventListener("change", () => {
+    refreshRecordsUI();
     startNewGame();
   });
 
   eraseBtn.addEventListener("click", () => {
     if (!selectedCell || isGameOver) return;
     const { row, col } = selectedCell;
-    if (puzzle[row][col] === BLANK) {
+    if (puzzle[row][col] === BLANK && userGrid[row][col] !== BLANK) {
+      saveHistory();
       updateCell(row, col, BLANK);
     }
   });
@@ -96,22 +134,16 @@ function setupEventListeners() {
     notesBtn.classList.toggle("btn-primary");
   });
 
-  // Theme Toggle Listener
   themeController.addEventListener("change", (e) => {
-    // If checked (True) -> User wants Light (Sun)
-    // If unchecked (False) -> User wants Dark (Moon)
-    const wantsLight = e.target.checked;
-    setTheme(!wantsLight);
+    setTheme(!e.target.checked);
   });
 
-  // Numpad clicks
   document.querySelectorAll(".numpad-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      handleInput(parseInt(btn.dataset.value));
+      handleInput(parseInt(btn.dataset.value, 10));
     });
   });
 
-  // Keyboard support
   document.addEventListener("keydown", (e) => {
     if (isGameOver) return;
 
@@ -119,27 +151,45 @@ function setupEventListeners() {
 
     if (selectedCell) {
       let { row, col } = selectedCell;
-      if (key === "ArrowUp") row = Math.max(0, row - 1);
-      if (key === "ArrowDown") row = Math.min(8, row + 1);
-      if (key === "ArrowLeft") col = Math.max(0, col - 1);
-      if (key === "ArrowRight") col = Math.min(8, col + 1);
-      selectCell(row, col);
-      return;
+      let moved = false;
+      if (key === "ArrowUp") {
+        row = Math.max(0, row - 1);
+        moved = true;
+      } else if (key === "ArrowDown") {
+        row = Math.min(8, row + 1);
+        moved = true;
+      } else if (key === "ArrowLeft") {
+        col = Math.max(0, col - 1);
+        moved = true;
+      } else if (key === "ArrowRight") {
+        col = Math.min(8, col + 1);
+        moved = true;
+      }
+      if (moved) {
+        e.preventDefault();
+        selectCell(row, col);
+        return;
+      }
     }
 
     if (key >= "1" && key <= "9") {
-      handleInput(parseInt(key));
+      handleInput(parseInt(key, 10));
       return;
     }
 
     if (key === "Backspace" || key === "Delete") {
       if (!selectedCell) return;
-      if (puzzle[selectedCell.row][selectedCell.col] === BLANK) {
+      if (
+        puzzle[selectedCell.row][selectedCell.col] === BLANK &&
+        userGrid[selectedCell.row][selectedCell.col] !== BLANK
+      ) {
+        saveHistory();
         updateCell(selectedCell.row, selectedCell.col, BLANK);
       }
+      return;
     }
 
-    if (key === "n") {
+    if (key === "n" || key === "N") {
       isNotesMode = !isNotesMode;
       notesBtn.classList.toggle("btn-active");
       notesBtn.classList.toggle("btn-primary");
@@ -152,43 +202,40 @@ function setupEventListeners() {
 function startNewGame() {
   isGameOver = false;
   mistakes = 0;
-  mistakesElement.innerText = mistakes;
+  moves = 0;
   seconds = 0;
   history = [];
   isNotesMode = false;
   notesBtn.classList.remove("btn-active", "btn-primary");
 
+  mistakesElement.innerText = mistakes;
+  movesElement.innerText = moves;
+  renderTimer();
+
   clearInterval(timerInterval);
-  timerInterval = setInterval(updateTimer, 1000);
-  updateTimer();
+  timerInterval = setInterval(() => {
+    seconds += 1;
+    renderTimer();
+  }, 1000);
 
   const difficulty = difficultySelect.value;
   document.getElementById("difficulty-display").innerText =
     difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+  refreshRecordsUI();
 
-  // Generate logic
   solution = sudoku.generate();
   puzzle = sudoku.createPuzzle(difficulty);
-
-  // Deep copy for userGrid
   userGrid = puzzle.map((row) => [...row]);
-
-  // Reset notes
   notesGrid = Array.from({ length: 9 }, () =>
     Array.from({ length: 9 }, () => new Set()),
   );
 
   renderGrid();
-  selectCell(null, null); // Deselect
+  selectCell(null, null);
 }
 
-function updateTimer() {
-  seconds++;
-  const m = Math.floor(seconds / 60)
-    .toString()
-    .padStart(2, "0");
-  const s = (seconds % 60).toString().padStart(2, "0");
-  timerElement.innerText = `${m}:${s}`;
+function renderTimer() {
+  timerElement.innerText = formatTime(seconds);
 }
 
 function renderGrid() {
@@ -198,7 +245,7 @@ function renderGrid() {
     for (let c = 0; c < 9; c++) {
       const cell = document.createElement("div");
       cell.className =
-        "sudoku-cell border border-base-content/20 bg-base-100 text-base-content"; // Base styling
+        "sudoku-cell border border-base-content/20 bg-base-100 text-base-content";
       cell.dataset.row = r;
       cell.dataset.col = c;
 
@@ -213,7 +260,6 @@ function renderGrid() {
           cell.classList.add("text-primary");
         }
       } else {
-        // Render notes
         const notes = notesGrid[r][c];
         if (notes.size > 0) {
           cell.classList.remove("flex", "items-center", "justify-center");
@@ -252,20 +298,15 @@ function selectCell(row, col) {
 
   selectedCell = { row, col };
 
-  // Reset classes
   document.querySelectorAll(".sudoku-cell").forEach((el) => {
     el.classList.remove("selected", "highlighted");
-    const r = parseInt(el.dataset.row);
-    const c = parseInt(el.dataset.col);
+    const r = parseInt(el.dataset.row, 10);
+    const c = parseInt(el.dataset.col, 10);
     const val = userGrid[r][c];
 
-    // Highlight selected
     if (r === row && c === col) {
       el.classList.add("selected");
-    }
-
-    // Highlight same row/col/box
-    else if (
+    } else if (
       r === row ||
       c === col ||
       (Math.floor(r / 3) === Math.floor(row / 3) &&
@@ -274,7 +315,6 @@ function selectCell(row, col) {
       el.classList.add("highlighted");
     }
 
-    // Highlight same numbers
     if (val !== BLANK && val === userGrid[row][col]) {
       el.classList.add("highlighted");
     }
@@ -285,7 +325,6 @@ function handleInput(num) {
   if (isGameOver || !selectedCell) return;
   const { row, col } = selectedCell;
 
-  // Cannot edit initial clues
   if (puzzle[row][col] !== BLANK) return;
 
   if (isNotesMode) {
@@ -293,48 +332,84 @@ function handleInput(num) {
     return;
   }
 
-  // Regular Input
-  if (userGrid[row][col] === num) return; // No change
-
-  // Basic Validation: Is it the correct number?
-  // "Pro" sudoku usually allows placing wrong numbers but validates them.
-  // We will check against solution for "Mistakes" mode.
+  if (userGrid[row][col] === num) return;
 
   const isCorrect = solution[row][col] === num;
 
   if (isCorrect) {
-    // Save history before move
     saveHistory();
+    moves += 1;
+    movesElement.innerText = moves;
 
-    updateCell(row, col, num);
+    const completed = getNewlyCompletedUnits(row, col);
+    updateCell(row, col, num, { animatePlace: true, completed });
 
-    // Check win
     if (checkWin()) {
-      gameOver(true);
+      playGridCompleteAnimation().then(() => gameOver(true));
     }
   } else {
-    mistakes++;
+    mistakes += 1;
     mistakesElement.innerText = mistakes;
 
-    // Visual feedback
     const cell = getCellEl(row, col);
     cell.classList.add("error");
-    // cell.innerText = num; // We could show it and mark error, or just flash error.
-    // Let's just flash error and NOT place it if it's strictly mistakes mode.
-    // Actually, let's strictly enforce solution here for simplicity of "mistakes" mechanic.
-
     setTimeout(() => cell.classList.remove("error"), 800);
 
     if (mistakes >= 3) {
-      // Optional: Game Over on too many mistakes
-      alert("Game Over! Too many mistakes.");
+      resetStreak();
+      alert("Game Over! Too many mistakes. Streak reset.");
       startNewGame();
     }
   }
 }
 
+function getNewlyCompletedUnits(row, col) {
+  const completed = { rows: [], cols: [], boxes: [] };
+
+  // After this correct fill, check if unit becomes complete
+  const wouldBe = userGrid.map((r) => [...r]);
+  wouldBe[row][col] = solution[row][col];
+
+  if (isRowComplete(wouldBe, row)) completed.rows.push(row);
+  if (isColComplete(wouldBe, col)) completed.cols.push(col);
+
+  const boxIndex = Math.floor(row / 3) * 3 + Math.floor(col / 3);
+  if (isBoxComplete(wouldBe, row, col)) completed.boxes.push(boxIndex);
+
+  return completed;
+}
+
+function isRowComplete(grid, row) {
+  for (let c = 0; c < 9; c++) {
+    if (grid[row][c] !== solution[row][c]) return false;
+  }
+  return true;
+}
+
+function isColComplete(grid, col) {
+  for (let r = 0; r < 9; r++) {
+    if (grid[r][col] !== solution[r][col]) return false;
+  }
+  return true;
+}
+
+function isBoxComplete(grid, row, col) {
+  const startRow = Math.floor(row / 3) * 3;
+  const startCol = Math.floor(col / 3) * 3;
+  for (let r = 0; r < 3; r++) {
+    for (let c = 0; c < 3; c++) {
+      if (
+        grid[startRow + r][startCol + c] !==
+        solution[startRow + r][startCol + c]
+      ) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 function toggleNote(row, col, num) {
-  // Check if cell is filled
   if (userGrid[row][col] !== BLANK) return;
 
   const notes = notesGrid[row][col];
@@ -343,34 +418,78 @@ function toggleNote(row, col, num) {
   } else {
     notes.add(num);
   }
-  // Re-render only this cell would be efficient, but grid is small enough to render all
-  // or properly re-render. Let's re-render all for simplicity of clearing highlights
   renderGrid();
-  selectCell(row, col); // Re-apply selection
+  selectCell(row, col);
 }
 
-function updateCell(row, col, val) {
-  userGrid[row][col] = val; // val is BLANK or number
+function updateCell(row, col, val, options = {}) {
+  userGrid[row][col] = val;
 
-  // Clear notes in this cell
   if (val !== BLANK) {
     notesGrid[row][col].clear();
-
-    // Optional: Clear notes in related row/col/box?
-    // Let's do it for "Smart Notes" feel
     removeNoteFromRelated(row, col, val);
   }
 
   renderGrid();
   selectCell(row, col);
+
+  if (options.animatePlace && val !== BLANK) {
+    const cell = getCellEl(row, col);
+    cell.classList.add("cell-placed");
+    setTimeout(() => cell.classList.remove("cell-placed"), 450);
+  }
+
+  if (options.completed) {
+    animateCompletedUnits(options.completed);
+  }
+}
+
+function animateCompletedUnits(completed) {
+  const targets = new Set();
+
+  for (const row of completed.rows) {
+    for (let c = 0; c < 9; c++) targets.add(`${row},${c}`);
+  }
+  for (const col of completed.cols) {
+    for (let r = 0; r < 9; r++) targets.add(`${r},${col}`);
+  }
+  for (const box of completed.boxes) {
+    const startRow = Math.floor(box / 3) * 3;
+    const startCol = (box % 3) * 3;
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 3; c++) {
+        targets.add(`${startRow + r},${startCol + c}`);
+      }
+    }
+  }
+
+  for (const key of targets) {
+    const [r, c] = key.split(",").map(Number);
+    const el = getCellEl(r, c);
+    el.classList.add("unit-complete");
+    setTimeout(() => el.classList.remove("unit-complete"), 700);
+  }
+}
+
+function playGridCompleteAnimation() {
+  return new Promise((resolve) => {
+    for (let r = 0; r < 9; r++) {
+      for (let c = 0; c < 9; c++) {
+        const el = getCellEl(r, c);
+        const delay = (r + c) * 35;
+        setTimeout(() => {
+          el.classList.add("grid-complete");
+          setTimeout(() => el.classList.remove("grid-complete"), 550);
+        }, delay);
+      }
+    }
+    setTimeout(resolve, 9 * 35 + 600);
+  });
 }
 
 function removeNoteFromRelated(row, col, val) {
-  // Row
   for (let c = 0; c < 9; c++) notesGrid[row][c].delete(val);
-  // Col
   for (let r = 0; r < 9; r++) notesGrid[r][col].delete(val);
-  // Box
   const startRow = Math.floor(row / 3) * 3;
   const startCol = Math.floor(col / 3) * 3;
   for (let r = 0; r < 3; r++) {
@@ -393,23 +512,65 @@ function checkWin() {
   return true;
 }
 
+function resetStreak() {
+  const stats = loadStats();
+  stats.streak = 0;
+  saveStats(stats);
+  refreshRecordsUI();
+}
+
+function recordWin(difficulty, timeSeconds) {
+  const stats = loadStats();
+  stats.streak += 1;
+  stats.gamesWon += 1;
+  if (stats.streak > stats.bestStreak) {
+    stats.bestStreak = stats.streak;
+  }
+
+  const previousBest = stats.bestTimes[difficulty];
+  const isNewBest = previousBest == null || timeSeconds < previousBest;
+  if (isNewBest) {
+    stats.bestTimes[difficulty] = timeSeconds;
+  }
+
+  saveStats(stats);
+  refreshRecordsUI();
+  return { isNewBest, streak: stats.streak, bestStreak: stats.bestStreak };
+}
+
 function gameOver(won) {
   isGameOver = true;
   clearInterval(timerInterval);
-  if (won) {
-    modalTime.innerText = timerElement.innerText;
-    modalDifficulty.innerText =
-      document.getElementById("difficulty-display").innerText;
-    winModal.showModal();
-  }
+
+  if (!won) return;
+
+  const difficulty = difficultySelect.value;
+  const result = recordWin(difficulty, seconds);
+
+  modalTime.innerText = formatTime(seconds);
+  modalMoves.innerText = String(moves);
+  modalDifficulty.innerText =
+    document.getElementById("difficulty-display").innerText;
+  modalStreak.innerText = String(result.streak);
+  modalMessage.innerText =
+    result.streak > 1
+      ? `Nice run — ${result.streak} wins in a row.`
+      : "Great job solving the puzzle!";
+  modalRecord.innerText = result.isNewBest
+    ? `New best time for ${modalDifficulty.innerText}!`
+    : result.streak === result.bestStreak && result.streak > 1
+      ? `Personal best streak: ${result.bestStreak}`
+      : "";
+
+  winModal.showModal();
 }
 
 function saveHistory() {
-  // Deep copy current states
   history.push({
     userGrid: userGrid.map((r) => [...r]),
     notesGrid: notesGrid.map((r) => r.map((c) => new Set(c))),
-    mistakes: mistakes,
+    mistakes,
+    moves,
   });
   if (history.length > 20) history.shift();
 }
@@ -420,7 +581,9 @@ function undo() {
   userGrid = lastState.userGrid;
   notesGrid = lastState.notesGrid;
   mistakes = lastState.mistakes;
+  moves = lastState.moves;
   mistakesElement.innerText = mistakes;
+  movesElement.innerText = moves;
   renderGrid();
   if (selectedCell) selectCell(selectedCell.row, selectedCell.col);
 }

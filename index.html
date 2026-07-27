@@ -70,29 +70,61 @@
       </header>
 
       <!-- Stats Bar -->
-      <div class="stats shadow w-full bg-base-100">
+      <div class="stats shadow w-full bg-base-100 dark:bg-gray-800">
         <div class="stat place-items-center p-2">
           <div class="stat-title text-xs uppercase font-bold tracking-wider">
-            Difficulty
+            Time
           </div>
-          <div id="difficulty-display" class="stat-value text-lg text-primary">
-            Medium
+          <div id="timer" class="stat-value text-lg font-mono tabular-nums">
+            00:00
           </div>
+        </div>
+        <div class="stat place-items-center p-2">
+          <div class="stat-title text-xs uppercase font-bold tracking-wider">
+            Moves
+          </div>
+          <div id="moves-count" class="stat-value text-lg tabular-nums">0</div>
         </div>
         <div class="stat place-items-center p-2">
           <div class="stat-title text-xs uppercase font-bold tracking-wider">
             Mistakes
           </div>
-          <div class="stat-value text-lg text-error">
+          <div class="stat-value text-lg text-error tabular-nums">
             <span id="mistakes-count">0</span>/3
           </div>
         </div>
-        <div class="stat place-items-center p-2">
-          <div class="stat-title text-xs uppercase font-bold tracking-wider">
-            Time
-          </div>
-          <div id="timer" class="stat-value text-lg font-mono dark:text-stone-800">00:00</div>
+      </div>
+
+      <!-- Records strip -->
+      <div
+        class="flex flex-wrap items-center justify-between gap-2 px-3 py-2 rounded-box border border-base-content/15 bg-base-100 dark:bg-gray-800 text-sm"
+      >
+        <div class="flex items-center gap-4">
+          <span>
+            <span class="opacity-60 uppercase text-xs font-bold tracking-wider"
+              >Difficulty</span
+            >
+            <span id="difficulty-display" class="ml-1.5 font-semibold text-primary"
+              >Medium</span
+            >
+          </span>
+          <span>
+            <span class="opacity-60 uppercase text-xs font-bold tracking-wider"
+              >Streak</span
+            >
+            <span id="streak-count" class="ml-1.5 font-semibold tabular-nums"
+              >0</span
+            >
+          </span>
         </div>
+        <span>
+          <span class="opacity-60 uppercase text-xs font-bold tracking-wider"
+            >Best</span
+          >
+          <span id="best-time" class="ml-1.5 font-mono font-semibold tabular-nums"
+            >--:--</span
+          >
+        </span>
       </div>
 
       <!-- Game Board -->
@@ -248,21 +280,50 @@
       </div>
     </footer>
 
-    <!-- Win Modal -->
+    <!-- Win Modal: plain bordered panel, no darkening backdrop -->
     <dialog id="win_modal" class="modal">
-      <div class="modal-box text-center">
-        <h3 class="font-bold text-3xl text-success mb-4">You Won! 🎉</h3>
-        <p class="py-4 text-lg">Great job solving the puzzle!</p>
-        <div class="stats shadow my-4">
-          <div class="stat">
-            <div class="stat-title">Time</div>
-            <div id="modal-time" class="stat-value">05:23</div>
+      <div
+        class="modal-box text-center border-2 border-base-content/20 bg-base-100 shadow-none"
+      >
+        <h3 class="font-bold text-3xl text-success mb-2">Puzzle Complete</h3>
+        <p id="modal-message" class="text-base opacity-80 mb-4">
+          Great job solving the puzzle!
+        </p>
+        <div
+          class="grid grid-cols-2 gap-3 text-left border border-base-content/15 rounded-box p-4 my-2"
+        >
+          <div>
+            <div class="text-xs uppercase font-bold tracking-wider opacity-60">
+              Time
+            </div>
+            <div id="modal-time" class="text-2xl font-mono font-semibold">
+              00:00
+            </div>
           </div>
-          <div class="stat">
-            <div class="stat-title">Difficulty</div>
-            <div id="modal-difficulty" class="stat-value text-sm">Medium</div>
+          <div>
+            <div class="text-xs uppercase font-bold tracking-wider opacity-60">
+              Moves
+            </div>
+            <div id="modal-moves" class="text-2xl font-semibold tabular-nums">
+              0
+            </div>
+          </div>
+          <div>
+            <div class="text-xs uppercase font-bold tracking-wider opacity-60">
+              Difficulty
+            </div>
+            <div id="modal-difficulty" class="text-lg font-semibold">Medium</div>
+          </div>
+          <div>
+            <div class="text-xs uppercase font-bold tracking-wider opacity-60">
+              Streak
+            </div>
+            <div id="modal-streak" class="text-lg font-semibold tabular-nums">
+              0
+            </div>
           </div>
         </div>
+        <p id="modal-record" class="text-sm text-primary font-medium min-h-5"></p>
         <div class="modal-action justify-center">
           <form method="dialog">
             <button

@@ -9,6 +9,7 @@ body {
 /* Custom grid borders */
 .sudoku-cell {
   @apply flex items-center justify-center text-2xl font-medium cursor-pointer transition-colors duration-200 select-none;
+  position: relative;
 }
 
 .sudoku-cell:hover {
@@ -25,10 +26,88 @@ body {
 
 .sudoku-cell.error {
   @apply bg-error/20 text-error;
+  animation: cell-shake 0.4s ease;
 }
 
 .sudoku-cell.filled-start {
   @apply font-bold;
+}
+
+/* Place-number pulse — no overlays, scale + color only */
+.sudoku-cell.cell-placed {
+  animation: cell-place 0.45s ease;
+}
+
+/* Row / column / box completion — light border wash, no dark scrim */
+.sudoku-cell.unit-complete {
+  animation: unit-complete 0.7s ease;
+}
+
+/* Full-grid win cascade */
+.sudoku-cell.grid-complete {
+  animation: grid-complete 0.55s ease both;
+}
+
+@keyframes cell-place {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.12);
+    color: var(--color-success);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes cell-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  75% {
+    transform: translateX(3px);
+  }
+}
+
+@keyframes unit-complete {
+  0% {
+    box-shadow: inset 0 0 0 0 color-mix(in oklab, var(--color-success) 0%, transparent);
+  }
+  35% {
+    box-shadow: inset 0 0 0 2px
+      color-mix(in oklab, var(--color-success) 70%, transparent);
+    background-color: color-mix(in oklab, var(--color-success) 12%, transparent);
+  }
+  100% {
+    box-shadow: inset 0 0 0 0 transparent;
+  }
+}
+
+@keyframes grid-complete {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+    background-color: color-mix(in oklab, var(--color-success) 18%, transparent);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sudoku-cell.cell-placed,
+  .sudoku-cell.unit-complete,
+  .sudoku-cell.grid-complete,
+  .sudoku-cell.error {
+    animation: none;
+  }
 }
 
 /* Thicker borders for 3x3 blocks */
@@ -48,4 +127,13 @@ body {
 .grid-cols-9 > div:nth-child(n + 46):nth-child(-n + 54) {
   border-bottom-width: 2px;
   border-bottom-color: var(--color-base-content);
+}
+
+/* Win modal: plain text panel — no darkened backdrop overlay */
+#win_modal::backdrop {
+  background: transparent;
+}
+
+#win_modal.modal {
+  background: transparent;
 }
