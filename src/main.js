@@ -33,6 +33,8 @@ const undoBtn = document.getElementById("btn-undo");
 const eraseBtn = document.getElementById("btn-erase");
 const notesBtn = document.getElementById("btn-notes");
 const winModal = document.getElementById("win_modal");
+const aboutModal = document.getElementById("about_modal");
+const aboutBtn = document.getElementById("btn-about");
 const modalTime = document.getElementById("modal-time");
 const modalMoves = document.getElementById("modal-moves");
 const modalDifficulty = document.getElementById("modal-difficulty");
@@ -197,6 +199,10 @@ function setupEventListeners() {
   });
 
   undoBtn.addEventListener("click", undo);
+
+  aboutBtn.addEventListener("click", () => {
+    aboutModal.showModal();
+  });
 }
 
 function startNewGame() {

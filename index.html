@@ -12,9 +12,24 @@
     <meta name="generator" content="Hand-edited by Danial Bakhtiari" />
     <meta
       name="description"
-      content="My Sudoku — Crafted by Danial Bakhtiari"
+      content="Sudoku Pro — a modern offline-ready Sudoku game. Developed & Architected by Danial Bakhtiari."
     />
     <meta name="dcterms.creator" content="Danial Bakhtiari" />
+    <meta name="dcterms.rightsHolder" content="Danial Bakhtiari" />
+    <meta name="application-name" content="Sudoku Pro" />
+    <link rel="author" href="https://danialbakhtiari.com" />
+    <meta property="og:title" content="Sudoku Pro" />
+    <meta
+      property="og:description"
+      content="Developed & Architected by Danial Bakhtiari"
+    />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Sudoku Pro" />
+    <meta
+      name="twitter:description"
+      content="Developed & Architected by Danial Bakhtiari"
+    />
     <link rel="stylesheet" href="./src/style.css" />
     <link
       rel="icon"
@@ -55,7 +70,15 @@
             <span class="text-primary dark:text-accent">Sudoku</span>Pro
           </a>
         </div>
-        <div class="flex-none">
+        <div class="flex-none flex items-center gap-1">
+          <button
+            type="button"
+            id="btn-about"
+            class="btn btn-ghost btn-sm"
+            aria-label="About Sudoku Pro"
+          >
+            About
+          </button>
           <label class="btn btn-square btn-ghost swap swap-rotate">
             <!-- this hidden checkbox controls the state -->
             <input type="checkbox" id="theme-controller" />
@@ -272,12 +295,24 @@
         </div>
       </div>
     </div>
-    <footer class="footer footer-center mt-1.5">
-      <div class="footer-content">
-        <div>
-          <p>Copyright © 2026 - All rights reserved by Danial Bakhtiari</p>
-        </div>
-      </div>
+    <footer
+      class="footer footer-center mt-2 text-sm opacity-80 border-t border-base-content/10 pt-3 w-full max-w-lg"
+    >
+      <aside class="flex flex-col gap-1 items-center">
+        <p class="font-medium text-base-content">
+          Developed &amp; Architected by
+          <a
+            href="https://danialbakhtiari.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="link link-primary font-semibold"
+            >Danial Bakhtiari</a
+          >
+        </p>
+        <p class="text-xs opacity-70">
+          Copyright © 2026 Danial Bakhtiari. All rights reserved.
+        </p>
+      </aside>
     </footer>
 
     <!-- Win Modal: plain bordered panel, no darkening backdrop -->
@@ -337,6 +372,60 @@
       </div>
     </dialog>
 
+    <!-- About Modal: plain bordered panel, no darkening backdrop -->
+    <dialog id="about_modal" class="modal">
+      <div
+        class="modal-box border-2 border-base-content/20 bg-base-100 shadow-none"
+      >
+        <h3 class="font-bold text-2xl mb-2">
+          <span class="text-primary">Sudoku</span>Pro
+        </h3>
+        <p class="opacity-80 mb-4">
+          A modern, offline-ready Sudoku experience with streaks, best times,
+          and a clean minimalist board.
+        </p>
+        <div class="border border-base-content/15 rounded-box p-4 mb-4">
+          <p class="text-xs uppercase font-bold tracking-wider opacity-60 mb-1">
+            Attribution
+          </p>
+          <p class="font-semibold">
+            Developed &amp; Architected by Danial Bakhtiari
+          </p>
+          <a
+            href="https://danialbakhtiari.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="link link-primary text-sm"
+            >danialbakhtiari.com</a
+          >
+        </div>
+        <p class="text-xs opacity-60 mb-2">
+          © 2026 Danial Bakhtiari. All rights reserved.
+        </p>
+        <div class="modal-action">
+          <form method="dialog">
+            <button class="btn btn-outline">Close</button>
+          </form>
+        </div>
+      </div>
+      <form method="dialog" class="modal-backdrop bg-transparent">
+        <button>close</button>
+      </form>
+    </dialog>
+
+    <!--
+      Sudoku Pro
+      Developed & Architected by Danial Bakhtiari
+      https://danialbakhtiari.com
+    -->
+    <script>
+      /* Signature lives outside the obfuscated bundle so it always prints. */
+      console.log(
+        "%cSudoku Pro%c\nDeveloped & Architected by Danial Bakhtiari\nhttps://danialbakhtiari.com",
+        "font-weight:700;font-size:14px;color:#65c3c8;",
+        "font-weight:400;font-size:12px;color:inherit;",
+      );
+    </script>
     <script type="module" src="./src/main.js"></script>
   </body>
 </html>

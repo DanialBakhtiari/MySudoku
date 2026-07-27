@@ -129,11 +129,13 @@ body {
   border-bottom-color: var(--color-base-content);
 }
 
-/* Win modal: plain text panel — no darkened backdrop overlay */
-#win_modal::backdrop {
+/* Win / About modals: plain text panels — no darkened backdrop overlay */
+#win_modal::backdrop,
+#about_modal::backdrop {
   background: transparent;
 }
 
-#win_modal.modal {
+#win_modal.modal,
+#about_modal.modal {
   background: transparent;
 }

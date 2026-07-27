@@ -22,7 +22,7 @@ export default defineConfig({
         id: "./",
         name: "Sudoku Pro",
         short_name: "Sudoku",
-        description: "My Sudoku — Crafted by Danial Bakhtiari",
+        description: "Sudoku Pro — Developed & Architected by Danial Bakhtiari",
         lang: "en",
         dir: "ltr",
         start_url: "./",
